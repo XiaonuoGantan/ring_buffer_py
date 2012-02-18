@@ -256,19 +256,22 @@ initring_buffer(void)
     if (m == NULL)
         return;
 
-    InsufficientDataError = PyErr_NewExceptionWithDoc(
-            "ring_buffer.InsufficientDataError",
-            "Not enough data to read from",
-            NULL,
-            NULL);
+    mod_bytearray_fifo = PyImport_ImportModule("libbrowzoo.python.exceptions");
+    if (mod_bytearray_fifo == NULL) {
+        return;
+    }
+
+    InsufficientDataError = PyObject_GetAttrString(mod_bytearray_fifo, "InsufficientDataError");
+    if (InsufficientDataError == NULL)
+        return;
     Py_INCREF(InsufficientDataError);
     PyModule_AddObject(m, "InsufficientDataError", InsufficientDataError);
 
-    FullError = PyErr_NewExceptionWithDoc(
-            "ring_buffer.FullError",
-            "Not enough free space to write to",
-            NULL,
-            NULL);
+    FullError = PyObject_GetAttrString(mod_bytearray_fifo, "FullError");
+    if (FullError == NULL)
+        return;
+    Py_INCREF(FullError);
+    PyModule_AddObject(m, "FullError", FullError);
 
     Py_INCREF(&buffer_BufferType);
     PyModule_AddObject(m, "Buffer", (PyObject *)&buffer_BufferType);
